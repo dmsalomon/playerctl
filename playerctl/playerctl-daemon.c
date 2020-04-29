@@ -737,6 +737,12 @@ static void player_signal_proxy_callback(GDBusConnection *connection, const gcha
     }
 
     if (player != context_get_active_player(ctx)) {
+        GVariantDict dict;
+        g_variant_dict_init(&dict, player->player_properties);
+        GVariant *prop_variant = g_variant_dict_lookup_value(&dict, "PlaybackStatus", G_VARIANT_TYPE_STRING);
+        const gchar *status = g_variant_get_string(prop_variant, NULL);
+        if (g_strcmp0(status, "Playing"))
+            return;
         g_debug("new active player: %s", player->well_known);
         context_set_active_player(ctx, player);
         player_update_position_sync(player, ctx, &error);
